@@ -3,7 +3,7 @@ const { exec } = require('child_process');
 // Function to install required packages
 function installPackages() {
     return new Promise((resolve, reject) => {
-        exec('sudo apt-get update && sudo apt-get install -y ffmpeg curl wget', (error, stdout, stderr) => {
+        exec('apt-get update && apt-get install -y ffmpeg curl wget', (error, stdout, stderr) => {
             if (error) {
                 reject(`Error installing packages: ${error}`);
                 return;
@@ -15,7 +15,7 @@ function installPackages() {
     });
 }
 
-// Function to install Chrome Remote Desktop
+// Function to install Chrome Remote Desktop and start the host
 function installCRD() {
     return new Promise((resolve, reject) => {
         exec('wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb', (error, stdout, stderr) => {
@@ -26,7 +26,7 @@ function installCRD() {
 
             console.log('CRD package downloaded successfully.');
 
-            exec('sudo dpkg -i chrome-remote-desktop_current_amd64.deb', (error, stdout, stderr) => {
+            exec('dpkg -i chrome-remote-desktop_current_amd64.deb', (error, stdout, stderr) => {
                 if (error) {
                     reject(`Error installing CRD package: ${error}`);
                     return;
@@ -34,7 +34,7 @@ function installCRD() {
 
                 console.log('CRD package installed successfully.');
 
-                exec('sudo apt install --assume-yes --fix-broken', (error, stdout, stderr) => {
+                exec('apt install --assume-yes --fix-broken', (error, stdout, stderr) => {
                     if (error) {
                         reject(`Error fixing dependencies: ${error}`);
                         return;
@@ -42,7 +42,7 @@ function installCRD() {
 
                     console.log('Dependencies fixed.');
 
-                    exec('sudo DEBIAN_FRONTEND=noninteractive apt install --assume-yes xfce4 desktop-base', (error, stdout, stderr) => {
+                    exec('DEBIAN_FRONTEND=noninteractive apt install --assume-yes xfce4 desktop-base', (error, stdout, stderr) => {
                         if (error) {
                             reject(`Error installing desktop environment: ${error}`);
                             return;
@@ -58,7 +58,7 @@ function installCRD() {
 
                             console.log('Xsession configured.');
 
-                            exec('sudo apt install --assume-yes xscreensaver', (error, stdout, stderr) => {
+                            exec('apt install --assume-yes xscreensaver', (error, stdout, stderr) => {
                                 if (error) {
                                     reject(`Error installing screensaver: ${error}`);
                                     return;
@@ -66,7 +66,7 @@ function installCRD() {
 
                                 console.log('Screensaver installed.');
 
-                                exec('sudo systemctl disable lightdm.service', (error, stdout, stderr) => {
+                                exec('systemctl disable lightdm.service', (error, stdout, stderr) => {
                                     if (error) {
                                         reject(`Error disabling lightdm: ${error}`);
                                         return;
@@ -74,19 +74,22 @@ function installCRD() {
 
                                     console.log('LightDM disabled.');
 
-                                    exec('sudo apt-get install nautilus nano -y', (error, stdout, stderr) => {
+                                    exec('apt-get install nautilus nano -y', (error, stdout, stderr) => {
                                         if (error) {
                                             reject(`Error installing nautilus and nano: ${error}`);
                                             return;
                                         }
 
                                         console.log('Nautilus and Nano installed.');
-                                        console.log('Installation complete. You can now set up Chrome Remote Desktop.');
+                                        console.log('Installation complete.');
 
-                                        // Additional steps like setting up Chrome Remote Desktop
-                                        // Instructions for setting up CRD: https://remotedesktop.google.com/headless
-
-                                        resolve();
+                                        // Start Chrome Remote Desktop host
+                                        startChromeRemoteDesktop().then(() => {
+                                            console.log('Chrome Remote Desktop host started successfully.');
+                                            resolve();
+                                        }).catch((err) => {
+                                            reject(`Error starting Chrome Remote Desktop host: ${err}`);
+                                        });
                                     });
                                 });
                             });
@@ -94,6 +97,22 @@ function installCRD() {
                     });
                 });
             });
+        });
+    });
+}
+
+// Function to start Chrome Remote Desktop host
+function startChromeRemoteDesktop() {
+    return new Promise((resolve, reject) => {
+        const command = `DISPLAY= /opt/google/chrome-remote-desktop/start-host --code="4/0AcvDMrAYiHeuFCA7YDY0m5zNSnyDZKQuVIAtEebagwMwy4hvP56O6rzvJ_1fetlhGlE5jw" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$(hostname)`;
+        
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+                return;
+            }
+
+            resolve();
         });
     });
 }
@@ -111,4 +130,3 @@ async function main() {
 
 // Start installation process
 main();
-
