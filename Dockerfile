@@ -63,8 +63,16 @@ EXPOSE 3389
 
 # Set up Chrome Remote Desktop with a PIN and updated URL
 USER chrome-user
-RUN /opt/google/chrome-remote-desktop/start-host --code="4/0AcvDMrD17MWdwFDpVkVMIUXwBlz9uSk3lKlmS5IszN_RdXeTODq8mcEkFDZCE79BPPsHYQ" \
-    --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$(hostname) --user-name=chrome-user --pin=123456
+RUN DISPLAY= /opt/google/chrome-remote-desktop/start-host --code="4/0AcvDMrD17MWdwFDpVkVMIUXwBlz9uSk3lKlmS5IszN_RdXeTODq8mcEkFDZCE79BPPsHYQ" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$(hostname) --user-name=chrome-user --pin=123456
 
 # Start XRDP service and Chrome Remote Desktop, then keep the container running
 CMD sudo service xrdp start && /opt/google/chrome-remote-desktop/start-host && tail -f /dev/null
+
+
+
+# DISPLAY= /opt/google/chrome-remote-desktop/start-host --code="4/0AcvDMrD17MWdwFDpVkVMIUXwBlz9uSk3lKlmS5IszN_RdXeTODq8mcEkFDZCE79BPPsHYQ" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$(hostname)
+
+
+
+
+
