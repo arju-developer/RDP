@@ -41,17 +41,22 @@ RUN wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.
     && dpkg -i chrome-remote-desktop_current_amd64.deb || apt-get -f install -y \
     && apt-get clean
 
-# Setup XRDP
+# Create a non-root user and set password
+RUN useradd -m chrome-user && echo "chrome-user:123456" | chpasswd && adduser chrome-user sudo
+
+# Setup XRDP and set RDP password
 RUN echo xfce4-session >~/.xsession \
-    && adduser xrdp ssl-cert
+    && adduser xrdp ssl-cert \
+    && echo "chrome-user:123456" | chpasswd
 
 # Expose RDP port
 EXPOSE 3389
 
 # Set up Chrome Remote Desktop
 ENV DISPLAY=:0
+USER chrome-user
 RUN /opt/google/chrome-remote-desktop/start-host --code="4/0AcvDMrCT_Zgzge9tL2z0Wal-B9KyCgFA_gX6YzXxs8akzTrlaONG4ZOqCb1A3hGFq8mibQ" \
-    --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$(hostname)
+    --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$(hostname) --user-name=chrome-user
 
 # Start XRDP service and Chrome Remote Desktop, then keep the container running
-CMD service xrdp start && /opt/google/chrome-remote-desktop/start-host && tail -f /dev/null
+CMD sudo service xrdp start && /opt/google/chrome-remote-desktop/start-host && tail -f /dev/null
