@@ -18,7 +18,8 @@ RUN apt-get update && apt-get install -y \
     locales \
     tzdata \
     gnupg \
-    && apt-get clean
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set the timezone to Indian Ocean
 RUN ln -fs /usr/share/zoneinfo/Indian/Mahe /etc/localtime && \
@@ -32,22 +33,25 @@ RUN locale-gen en_GB.UTF-8 && \
     dpkg-reconfigure -f noninteractive keyboard-configuration
 
 # Install Google Chrome
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && dpkg -i google-chrome-stable_current_amd64.deb || apt-get -f install -y \
-    && apt-get clean
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    dpkg -i google-chrome-stable_current_amd64.deb || apt-get -f install -y && \
+    apt-get clean && rm google-chrome-stable_current_amd64.deb
 
 # Install Chrome Remote Desktop
-RUN wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb \
-    && dpkg -i chrome-remote-desktop_current_amd64.deb || apt-get -f install -y \
-    && apt-get clean
+RUN wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb && \
+    dpkg -i chrome-remote-desktop_current_amd64.deb || apt-get -f install -y && \
+    apt-get clean && rm chrome-remote-desktop_current_amd64.deb
 
 # Install XFCE and related packages for Chrome Remote Desktop
-RUN DEBIAN_FRONTEND=noninteractive \
-    apt install --assume-yes xfce4 desktop-base dbus-x11 xscreensaver \
-    && apt-get clean
+RUN apt-get update && apt-get install -y \
+    xfce4 \
+    desktop-base \
+    xscreensaver \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Configure Chrome Remote Desktop to use XFCE
-RUN bash -c 'echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-remote-desktop-session'
+RUN echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-remote-desktop-session
 
 # Disable the lightdm service to avoid conflicts
 RUN systemctl disable lightdm.service
@@ -67,12 +71,3 @@ RUN DISPLAY= /opt/google/chrome-remote-desktop/start-host --code="4/0AcvDMrD17MW
 
 # Start XRDP service and Chrome Remote Desktop, then keep the container running
 CMD sudo service xrdp start && /opt/google/chrome-remote-desktop/start-host && tail -f /dev/null
-
-
-
-# DISPLAY= /opt/google/chrome-remote-desktop/start-host --code="4/0AcvDMrD17MWdwFDpVkVMIUXwBlz9uSk3lKlmS5IszN_RdXeTODq8mcEkFDZCE79BPPsHYQ" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$(hostname)
-
-
-
-
-
