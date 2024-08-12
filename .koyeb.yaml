@@ -1,0 +1,14 @@
+name: chrome-rdp-app
+port: 3389
+
+services:
+  - name: chrome-rdp
+    type: docker
+    ports:
+      - name: rdp
+        port: 3389
+    source:
+      type: github
+      repo: https://github.com/arju-developer/RDP
+      branch: main
+      dockerfile: Dockerfile 
