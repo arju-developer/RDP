@@ -10,5 +10,5 @@ services:
     source:
       type: github
       repo: https://github.com/arju-developer/RDP
-      branch: main
+      branch: master
       dockerfile: Dockerfile 
