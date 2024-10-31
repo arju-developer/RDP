@@ -12,6 +12,8 @@
   sudo apt install ./chrome-remote-desktop_current_amd64.deb -y
 
     5
+
+    
   sudo DEBIAN_FRONTEND=noninteractive \
  apt install --assume-yes xfce4 desktop-base dbus-x11 xscreensaver
 
